@@ -155,6 +155,104 @@ Gateway health check: http://localhost:8080/actuator/health
 
 Swagger
 Each service exposes Swagger UI at /swagger-ui.html on its own port. For example, Auth Service docs are at http://localhost:8081/swagger-ui.html.
+                                   ┌──────────────────────────────┐
+                                   │       React Frontend         │
+                                   │------------------------------│
+                                   │ React + Tailwind CSS         │
+                                   │ JWT + LocalStorage           │
+                                   │ Passenger Dashboard          │
+                                   │ Admin Dashboard              │
+                                   │ Airline Staff Dashboard      │
+                                   └──────────────┬───────────────┘
+                                                  │
+                                      HTTPS + Bearer JWT
+                                                  │
+                                   ┌──────────────▼───────────────┐
+                                   │         API Gateway          │
+                                   │------------------------------│
+                                   │ Spring Cloud Gateway         │
+                                   │ Port : 8080                 │
+                                   │ JWT Validation               │
+                                   │ Route Management             │
+                                   │ CORS Configuration           │
+                                   └───────┬────────┬─────────────┘
+                                           │        │
 
-Author
-Naman Agrawal
+ ┌─────────────────────────────────────────┼──────────────────────────────────────────┐
+ │                                         │                                          │
+
+┌───────────────┐                 ┌────────▼────────┐                      ┌────────▼────────┐
+│ Auth Service  │                 │ Airline Service │                      │ Flight Service  │
+│---------------│                 │-----------------│                      │-----------------│
+│ Port : 8081   │                 │ Port : 8082     │                      │ Port : 8083     │
+│ JWT Auth      │                 │ Airlines        │                      │ Flight Search   │
+│ Login/Register│                 │ Airports        │                      │ Flight Schedule │
+│ OAuth2        │                 │ IATA Codes      │                      │ Flight Status   │
+│ User Roles    │                 │ Airport Search  │                      │ Seat Counters   │
+└──────┬────────┘                 └────────┬────────┘                      └────────┬────────┘
+       │                                   │                                        │
+       │                                   │                                        │
+┌──────▼───────┐                 ┌─────────▼─────────┐                    ┌─────────▼─────────┐
+│ auth_db      │                 │ airline_db        │                    │ flight_db         │
+└──────────────┘                 └───────────────────┘                    └───────────────────┘
+
+
+
+┌──────────────────────┐                                  ┌────────────────────────┐
+│ Seat Service         │                                  │ Passenger Service      │
+│----------------------│                                  │------------------------│
+│ Port : 8084          │                                  │ Port : 8085            │
+│ Seat Map             │                                  │ Passenger Details      │
+│ Seat Hold            │                                  │ Ticket Generation      │
+│ Seat Availability    │                                  │ Passport Validation    │
+│ Seat Confirmation    │                                  │ Check-In Details       │
+└──────────┬───────────┘                                  └──────────┬─────────────┘
+           │                                                         │
+           │                                                         │
+┌──────────▼───────────┐                               ┌─────────────▼────────────┐
+│ seat_db              │                               │ passenger_db             │
+└──────────────────────┘                               └──────────────────────────┘
+
+
+
+                                   ┌──────────────────────────────┐
+                                   │      Booking Service         │
+                                   │------------------------------│
+                                   │ Port : 8086                 │
+                                   │ Booking Lifecycle           │
+                                   │ PNR Generation              │
+                                   │ Fare Calculation            │
+                                   │ Booking Status              │
+                                   └──────────────┬──────────────┘
+                                                  │
+                   ┌──────────────────────────────┼────────────────────────────┐
+                   │                              │                            │
+
+        ┌──────────▼──────────┐       ┌──────────▼──────────┐      ┌──────────▼──────────┐
+        │ Payment Service     │       │ Notification Service│      │ Redis Cache         │
+        │---------------------│       │---------------------│      │---------------------│
+        │ Port : 8087         │       │ Port : 8088         │      │ Seat Hold Cache    │
+        │ Razorpay / Stripe   │       │ Email Notifications │      │ JWT Blacklist      │
+        │ Refund Processing   │       │ SMS Notifications   │      │ Flight Search Cache│
+        │ Payment Status      │       │ Check-In Reminder   │      │ Session Cache      │
+        └──────────┬──────────┘       └──────────┬──────────┘      └─────────────────────┘
+                   │                             │
+                   │                             │
+        ┌──────────▼──────────┐       ┌──────────▼──────────┐
+        │ payment_db          │       │ notification_db     │
+        └─────────────────────┘       └─────────────────────┘
+
+
+
+                     ┌────────────────────────────────────────────┐
+                     │           External Services                │
+                     │--------------------------------------------│
+                     │ Razorpay / Stripe Payment Gateway          │
+                     │ Gmail SMTP Server                          │
+                     │ Twilio SMS API                             │
+                     │ Google OAuth2 Login                        │
+                     └────────────────────────────────────────────┘
+
+                     \
+        AUTHOR
+        Naman Agrawal
